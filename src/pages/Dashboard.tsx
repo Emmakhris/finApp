@@ -35,17 +35,17 @@ export function Dashboard() {
         </Button>
       </div>
 
-      {summary && summary.overdueLoans.length + summary.overdueReceivables.length + summary.overduePayables.length > 0 && (
+      {summary && (summary.overdueReceivables + summary.overduePayables) > 0 && (
         <OverdueAlerts summary={summary} />
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <SummaryCard label="Total Income" value={summary?.totalIncome ?? 0} icon={TrendingUp} variant="income" subtitle="This month" />
         <SummaryCard label="Total Expenses" value={summary?.totalExpenses ?? 0} icon={TrendingDown} variant="expense" subtitle="This month" />
-        <SummaryCard label="Net Balance" value={summary?.netBalance ?? 0} icon={Wallet} variant={summary && summary.netBalance >= 0 ? 'neutral' : 'expense'} subtitle="Income − Expenses" />
-        <SummaryCard label="Receivables" value={summary?.outstandingReceivables ?? 0} icon={Clock} variant="indigo" subtitle="Outstanding" />
-        <SummaryCard label="Payables" value={summary?.outstandingPayables ?? 0} icon={CreditCard} variant="warning" subtitle="Outstanding" />
-        <SummaryCard label="Active Loans" value={summary?.activeLoanTotal ?? 0} icon={HandCoins} variant="neutral" subtitle="Total outstanding" />
+        <SummaryCard label="Net Balance" value={summary?.netProfit ?? 0} icon={Wallet} variant={summary && summary.netProfit >= 0 ? 'neutral' : 'expense'} subtitle="Income − Expenses" />
+        <SummaryCard label="Receivables" value={summary?.totalReceivables ?? 0} icon={Clock} variant="indigo" subtitle="Outstanding" />
+        <SummaryCard label="Payables" value={summary?.totalPayables ?? 0} icon={CreditCard} variant="warning" subtitle="Outstanding" />
+        <SummaryCard label="Active Loans" value={summary?.totalLoansOutstanding ?? 0} icon={HandCoins} variant="neutral" subtitle="Total outstanding" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

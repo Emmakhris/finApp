@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { db } from '../../db/db';
+import { useDeletePayable } from '../../hooks/usePayables';
 import { formatGHS } from '../../utils/currency';
 import { formatDate } from '../../utils/dateHelpers';
 import { Badge } from '../ui/Badge';
@@ -19,6 +19,7 @@ export function PayableList({ payables }: Props) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [editing, setEditing] = useState<Payable | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const deletePayable = useDeletePayable();
 
   if (!payables.length) {
     return <p className="text-center text-slate-400 py-12">No payables found.</p>;
@@ -76,7 +77,7 @@ export function PayableList({ payables }: Props) {
       <ConfirmDialog
         open={deleting != null}
         onClose={() => setDeleting(null)}
-        onConfirm={async () => { await db.payables.delete(deleting!); setDeleting(null); }}
+        onConfirm={async () => { await deletePayable.mutateAsync(deleting!); setDeleting(null); }}
         title="Delete Payable"
         message="Delete this payable and all its payment records?"
       />

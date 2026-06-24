@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { db } from '../../db/db';
+import { useDeleteReceivable } from '../../hooks/useReceivables';
 import { formatGHS } from '../../utils/currency';
 import { formatDate } from '../../utils/dateHelpers';
 import { Badge } from '../ui/Badge';
@@ -19,6 +19,7 @@ export function ReceivableList({ receivables }: Props) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [editing, setEditing] = useState<Receivable | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const deleteReceivable = useDeleteReceivable();
 
   if (!receivables.length) {
     return <p className="text-center text-slate-400 py-12">No receivables found.</p>;
@@ -76,7 +77,7 @@ export function ReceivableList({ receivables }: Props) {
       <ConfirmDialog
         open={deleting != null}
         onClose={() => setDeleting(null)}
-        onConfirm={async () => { await db.receivables.delete(deleting!); setDeleting(null); }}
+        onConfirm={async () => { await deleteReceivable.mutateAsync(deleting!); setDeleting(null); }}
         title="Delete Receivable"
         message="Delete this receivable and all its payment records?"
       />

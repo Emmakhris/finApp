@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { db } from '../../db/db';
+import { useAddReceivable, useUpdateReceivable } from '../../hooks/useReceivables';
 import { toStorageAmount, fromStorageAmount } from '../../utils/currency';
 import { todayISO } from '../../utils/dateHelpers';
 import { Input } from '../ui/Input';
@@ -19,6 +19,8 @@ interface FormData {
 interface Props { onClose: () => void; existing?: Receivable; }
 
 export function ReceivableForm({ onClose, existing }: Props) {
+  const addReceivable = useAddReceivable();
+  const updateReceivable = useUpdateReceivable();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     defaultValues: existing ? {
       contactName: existing.contactName,
@@ -31,24 +33,18 @@ export function ReceivableForm({ onClose, existing }: Props) {
   });
 
   async function onSubmit(data: FormData) {
-    const now = new Date();
-    const amount = toStorageAmount(data.amount);
-    const paid = existing?.amountPaid ?? 0;
-    const status = paid === 0 ? 'unpaid' : paid >= amount ? 'paid' : 'partial';
     const payload = {
       contactName: data.contactName,
       description: data.description,
-      originalAmount: amount,
-      dueDate: new Date(data.dueDate),
+      originalAmount: toStorageAmount(data.amount),
+      dueDate: data.dueDate,
       accountType: data.accountType,
       notes: data.notes || undefined,
-      updatedAt: now,
-      status,
-    } as const;
+    };
     if (existing?.id) {
-      await db.receivables.update(existing.id, payload);
+      await updateReceivable.mutateAsync({ id: existing.id, ...payload } as any);
     } else {
-      await db.receivables.add({ ...payload, amountPaid: 0, status: 'unpaid', createdAt: now });
+      await addReceivable.mutateAsync(payload as any);
     }
     onClose();
   }

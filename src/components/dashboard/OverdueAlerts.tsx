@@ -1,13 +1,12 @@
 import { AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatGHS } from '../../utils/currency';
 import type { DashboardSummary } from '../../types';
 
 interface Props { summary: DashboardSummary; }
 
 export function OverdueAlerts({ summary }: Props) {
-  const { overdueLoans, overdueReceivables, overduePayables } = summary;
-  const total = overdueLoans.length + overdueReceivables.length + overduePayables.length;
+  const { overdueReceivables, overduePayables } = summary;
+  const total = overdueReceivables + overduePayables;
   if (total === 0) return null;
 
   return (
@@ -16,14 +15,11 @@ export function OverdueAlerts({ summary }: Props) {
       <div className="flex-1">
         <p className="font-medium text-amber-800 mb-1">Action Required — {total} overdue item{total > 1 ? 's' : ''}</p>
         <ul className="text-sm text-amber-700 space-y-0.5">
-          {overdueLoans.length > 0 && (
-            <li><Link to="/loans" className="underline">{overdueLoans.length} overdue loan{overdueLoans.length > 1 ? 's' : ''}</Link></li>
+          {overdueReceivables > 0 && (
+            <li><Link to="/receivables" className="underline">{overdueReceivables} overdue receivable{overdueReceivables > 1 ? 's' : ''}</Link></li>
           )}
-          {overdueReceivables.length > 0 && (
-            <li><Link to="/receivables" className="underline">{overdueReceivables.length} overdue receivable{overdueReceivables.length > 1 ? 's' : ''}</Link></li>
-          )}
-          {overduePayables.length > 0 && (
-            <li><Link to="/payables" className="underline">{overduePayables.length} overdue payable{overduePayables.length > 1 ? 's' : ''}</Link></li>
+          {overduePayables > 0 && (
+            <li><Link to="/payables" className="underline">{overduePayables} overdue payable{overduePayables > 1 ? 's' : ''}</Link></li>
           )}
         </ul>
       </div>

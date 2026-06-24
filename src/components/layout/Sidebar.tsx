@@ -3,8 +3,8 @@ import {
   LayoutDashboard, ArrowLeftRight, TrendingUp, TrendingDown,
   HandCoins, BarChart3, Settings, Landmark,
 } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db/db';
+import { useLoans } from '../../hooks/useLoans';
+import { useReceivables } from '../../hooks/useReceivables';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -17,12 +17,11 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  const overdueLoans = useLiveQuery(() =>
-    db.loans.where('status').equals('overdue').count(), []) ?? 0;
-  const overdueReceivables = useLiveQuery(() =>
-    db.receivables.where('status').notEqual('paid').toArray().then(
-      r => r.filter(x => new Date(x.dueDate) < new Date()).length
-    ), []) ?? 0;
+  const loans = useLoans() ?? [];
+  const receivables = useReceivables() ?? [];
+  const now = new Date();
+  const overdueLoans = loans.filter(l => l.status === 'overdue').length;
+  const overdueReceivables = receivables.filter(r => r.status !== 'paid' && new Date(r.dueDate) < now).length;
 
   const badges: Record<string, number> = {
     '/loans': overdueLoans,
@@ -58,7 +57,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="px-5 py-4 border-t border-slate-800 text-xs text-slate-500">
-        GHS · Local Storage
+        GHS · PostgreSQL
       </div>
     </aside>
   );

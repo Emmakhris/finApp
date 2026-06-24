@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil, Trash2, ChevronDown, ChevronUp, PlusCircle } from 'lucide-react';
-import { db } from '../../db/db';
+import { useDeleteLoan } from '../../hooks/useLoans';
 import { formatGHS } from '../../utils/currency';
 import { formatDate } from '../../utils/dateHelpers';
 import { Badge } from '../ui/Badge';
@@ -70,6 +70,7 @@ export function LoanList({ loans }: Props) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [editing, setEditing] = useState<Loan | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const deleteLoan = useDeleteLoan();
 
   if (!loans.length) {
     return <p className="text-center text-slate-400 py-12">No loans found.</p>;
@@ -131,7 +132,7 @@ export function LoanList({ loans }: Props) {
       <ConfirmDialog
         open={deleting != null}
         onClose={() => setDeleting(null)}
-        onConfirm={async () => { await db.loans.delete(deleting!); setDeleting(null); }}
+        onConfirm={async () => { await deleteLoan.mutateAsync(deleting!); setDeleting(null); }}
         title="Delete Loan"
         message="Delete this loan and all its repayment records?"
       />

@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { db } from '../../db/db';
+import { useAddLoanRepayment } from '../../hooks/useLoans';
 import { toStorageAmount } from '../../utils/currency';
 import { todayISO } from '../../utils/dateHelpers';
 import { Input } from '../ui/Input';
@@ -10,24 +10,18 @@ interface FormData { amount: string; date: string; notes?: string; }
 interface Props { loan: Loan; onClose: () => void; }
 
 export function RepaymentForm({ loan, onClose }: Props) {
+  const addRepayment = useAddLoanRepayment();
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<FormData>({
     defaultValues: { date: todayISO() },
   });
 
   async function onSubmit(data: FormData) {
-    const amount = toStorageAmount(data.amount);
-    const now = new Date();
-    await db.loanRepayments.add({
+    await addRepayment.mutateAsync({
       loanId: loan.id!,
-      amount,
-      date: new Date(data.date),
+      amount: toStorageAmount(data.amount),
+      date: data.date,
       notes: data.notes || undefined,
-      createdAt: now,
     });
-    const newTotal = loan.totalRepaid + amount;
-    const status = newTotal >= loan.principalAmount ? 'repaid' :
-      new Date(loan.expectedRepaymentDate) < now ? 'overdue' : 'active';
-    await db.loans.update(loan.id!, { totalRepaid: newTotal, status, updatedAt: now });
     onClose();
   }
 

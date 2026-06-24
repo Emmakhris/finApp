@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { db } from '../../db/db';
 import { formatGHS, toStorageAmount } from '../../utils/currency';
 import { formatDate, todayISO } from '../../utils/dateHelpers';
-import { usePaymentsFor } from '../../hooks/useReceivables';
+import { usePaymentsFor, useAddPayment } from '../../hooks/useReceivables';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import type { Receivable, Payable } from '../../types';
@@ -17,29 +16,20 @@ interface PaymentForm { amount: string; date: string; notes?: string; }
 
 export function PaymentHistoryDrawer({ parentType, parent }: Props) {
   const payments = usePaymentsFor(parentType, parent.id!) ?? [];
+  const addPayment = useAddPayment();
   const [showForm, setShowForm] = useState(false);
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<PaymentForm>({
     defaultValues: { date: todayISO() },
   });
 
   async function onSubmit(data: PaymentForm) {
-    const amount = toStorageAmount(data.amount);
-    const now = new Date();
-    await db.payments.add({
+    await addPayment.mutateAsync({
       parentType,
       parentId: parent.id!,
-      amount,
-      date: new Date(data.date),
+      amount: toStorageAmount(data.amount),
+      date: data.date,
       notes: data.notes || undefined,
-      createdAt: now,
     });
-    const newPaid = parent.amountPaid + amount;
-    const status = newPaid >= parent.originalAmount ? 'paid' : 'partial';
-    if (parentType === 'receivable') {
-      await db.receivables.update(parent.id!, { amountPaid: newPaid, status, updatedAt: now });
-    } else {
-      await db.payables.update(parent.id!, { amountPaid: newPaid, status, updatedAt: now });
-    }
     reset({ date: todayISO() });
     setShowForm(false);
   }

@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { format, startOfMonth } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/db';
-import { useCategories } from '../hooks/useTransactions';
+import { useTransactions, useCategories } from '../hooks/useTransactions';
+import { useReceivables } from '../hooks/useReceivables';
 import { formatGHS } from '../utils/currency';
 import { Button } from '../components/ui/Button';
 import { exportTransactionsPDF } from '../utils/exportPDF';
@@ -16,15 +15,11 @@ export function Reports() {
   const categories = useCategories() ?? [];
   const catMap = Object.fromEntries(categories.map(c => [c.id, c]));
 
-  const transactions = useLiveQuery(async () => {
-    const from = startOfMonth(month);
-    const to = endOfMonth(month);
-    const all = await db.transactions.toArray();
-    return all.filter(t => new Date(t.date) >= from && new Date(t.date) <= to);
-  }, [month.toISOString()]) ?? [];
-
-  const receivables = useLiveQuery(() => db.receivables.toArray(), []) ?? [];
-  const payables = useLiveQuery(() => db.payables.toArray(), []) ?? [];
+  const from = new Date(month.getFullYear(), month.getMonth(), 1);
+  const to = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  const transactions = useTransactions({ from, to }) ?? [];
+  const receivables = useReceivables() ?? [];
+  const payables: any[] = [];
 
   const income = transactions.filter(t => t.type === 'income');
   const expenses = transactions.filter(t => t.type === 'expense');
@@ -44,7 +39,7 @@ export function Reports() {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2">
-        <button onClick={() => setMonth(subMonths(month, 1))} className="p-1 rounded hover:bg-slate-200"><ChevronLeft size={16} className="text-slate-500" /></button>
+        <button onClick={() => { const d = new Date(month); d.setMonth(d.getMonth() - 1); setMonth(startOfMonth(d)); }} className="p-1 rounded hover:bg-slate-200"><ChevronLeft size={16} className="text-slate-500" /></button>
         <span className="text-sm font-medium text-slate-700 w-28 text-center">{format(month, 'MMMM yyyy')}</span>
         <button onClick={() => setMonth(m => { const next = new Date(m); next.setMonth(m.getMonth() + 1); return startOfMonth(next); })} className="p-1 rounded hover:bg-slate-200"><ChevronRight size={16} className="text-slate-500" /></button>
       </div>

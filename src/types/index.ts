@@ -95,13 +95,12 @@ export interface LoanRepayment {
 export interface DashboardSummary {
   totalIncome: number;
   totalExpenses: number;
-  netBalance: number;
-  outstandingReceivables: number;
-  outstandingPayables: number;
-  activeLoanTotal: number;
-  overdueLoans: Loan[];
-  overdueReceivables: Receivable[];
-  overduePayables: Payable[];
+  netProfit: number;
+  totalReceivables: number;
+  totalPayables: number;
+  totalLoansOutstanding: number;
+  overdueReceivables: number;
+  overduePayables: number;
 }
 
 export interface MonthlyData {

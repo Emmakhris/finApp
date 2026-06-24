@@ -1,24 +1,26 @@
 import { useState } from 'react';
 import { Plus, Trash2, Download, Upload } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/db';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { useCategories, useAddCategory, useDeleteCategory } from '../hooks/useTransactions';
+import { apiFetch } from '../lib/apiClient';
 import type { Category } from '../types';
 
 function CategoryManager() {
-  const categories = useLiveQuery(() => db.categories.toArray(), []) ?? [];
+  const categories = useCategories() ?? [];
+  const addCategory = useAddCategory();
+  const deleteCategory = useDeleteCategory();
   const [name, setName] = useState('');
   const [type, setType] = useState<'income' | 'expense'>('income');
   const [accountType, setAccountType] = useState<'personal' | 'business' | 'both'>('personal');
   const [color, setColor] = useState('#6366f1');
   const [deleting, setDeleting] = useState<number | null>(null);
 
-  async function addCategory() {
+  async function handleAdd() {
     if (!name.trim()) return;
-    await db.categories.add({ name: name.trim(), type, accountType, color, isCustom: true });
+    await addCategory.mutateAsync({ name: name.trim(), type, accountType, color, isCustom: true });
     setName('');
   }
 
@@ -33,7 +35,7 @@ function CategoryManager() {
         <Select options={[{ value: 'income', label: 'Income' }, { value: 'expense', label: 'Expense' }]} value={type} onChange={e => setType(e.target.value as 'income' | 'expense')} className="w-28" />
         <Select options={[{ value: 'personal', label: 'Personal' }, { value: 'business', label: 'Business' }, { value: 'both', label: 'Both' }]} value={accountType} onChange={e => setAccountType(e.target.value as Category['accountType'])} className="w-28" />
         <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-10 h-9 rounded border border-slate-300 cursor-pointer" />
-        <Button onClick={addCategory} size="sm"><Plus size={14} /> Add</Button>
+        <Button onClick={handleAdd} size="sm"><Plus size={14} /> Add</Button>
       </div>
 
       <div className="divide-y divide-slate-100">
@@ -54,7 +56,7 @@ function CategoryManager() {
       <ConfirmDialog
         open={deleting != null}
         onClose={() => setDeleting(null)}
-        onConfirm={async () => { await db.categories.delete(deleting!); setDeleting(null); }}
+        onConfirm={async () => { await deleteCategory.mutateAsync(deleting!); setDeleting(null); }}
         title="Delete Category"
         message="Delete this category? Existing transactions using it will still reference its ID."
       />
@@ -64,15 +66,7 @@ function CategoryManager() {
 
 function DataBackup() {
   async function exportAll() {
-    const data = {
-      transactions: await db.transactions.toArray(),
-      receivables: await db.receivables.toArray(),
-      payables: await db.payables.toArray(),
-      payments: await db.payments.toArray(),
-      loans: await db.loans.toArray(),
-      loanRepayments: await db.loanRepayments.toArray(),
-      categories: await db.categories.toArray(),
-    };
+    const data = await apiFetch('/backup/export');
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -88,16 +82,10 @@ function DataBackup() {
     const text = await file.text();
     try {
       const data = JSON.parse(text);
-      if (data.categories) await db.categories.bulkPut(data.categories);
-      if (data.transactions) await db.transactions.bulkPut(data.transactions.map((t: any) => ({ ...t, date: new Date(t.date), createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) })));
-      if (data.receivables) await db.receivables.bulkPut(data.receivables.map((r: any) => ({ ...r, dueDate: new Date(r.dueDate), createdAt: new Date(r.createdAt), updatedAt: new Date(r.updatedAt) })));
-      if (data.payables) await db.payables.bulkPut(data.payables.map((p: any) => ({ ...p, dueDate: new Date(p.dueDate), createdAt: new Date(p.createdAt), updatedAt: new Date(p.updatedAt) })));
-      if (data.payments) await db.payments.bulkPut(data.payments.map((p: any) => ({ ...p, date: new Date(p.date), createdAt: new Date(p.createdAt) })));
-      if (data.loans) await db.loans.bulkPut(data.loans.map((l: any) => ({ ...l, startDate: new Date(l.startDate), expectedRepaymentDate: new Date(l.expectedRepaymentDate), createdAt: new Date(l.createdAt), updatedAt: new Date(l.updatedAt) })));
-      if (data.loanRepayments) await db.loanRepayments.bulkPut(data.loanRepayments.map((r: any) => ({ ...r, date: new Date(r.date), createdAt: new Date(r.createdAt) })));
+      await apiFetch('/backup/import', { method: 'POST', body: JSON.stringify(data) });
       alert('Data restored successfully!');
     } catch {
-      alert('Invalid backup file.');
+      alert('Invalid backup file or server error.');
     }
     e.target.value = '';
   }
@@ -105,7 +93,7 @@ function DataBackup() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5">
       <h2 className="font-semibold text-slate-900 mb-2">Data Backup & Restore</h2>
-      <p className="text-xs text-slate-500 mb-4">All data is stored locally in your browser. Export a backup regularly to avoid data loss.</p>
+      <p className="text-xs text-slate-500 mb-4">All data is stored in PostgreSQL. Export a backup regularly for safekeeping.</p>
       <div className="flex gap-3">
         <Button variant="secondary" onClick={exportAll}><Download size={14} /> Export Backup</Button>
         <label className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 cursor-pointer transition-colors">

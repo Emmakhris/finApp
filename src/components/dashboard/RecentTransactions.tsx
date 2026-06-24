@@ -1,14 +1,12 @@
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db/db';
 import { formatGHS } from '../../utils/currency';
 import { formatDate } from '../../utils/dateHelpers';
-import { useCategories } from '../../hooks/useTransactions';
+import { useTransactions, useCategories } from '../../hooks/useTransactions';
 import { Link } from 'react-router-dom';
 
 export function RecentTransactions() {
-  const transactions = useLiveQuery(() =>
-    db.transactions.orderBy('date').reverse().limit(8).toArray(), []) ?? [];
+  const allTransactions = useTransactions() ?? [];
+  const transactions = allTransactions.slice(0, 8);
   const categories = useCategories() ?? [];
   const catMap = Object.fromEntries(categories.map(c => [c.id, c]));
 

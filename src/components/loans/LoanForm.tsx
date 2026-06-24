@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { db } from '../../db/db';
+import { useAddLoan, useUpdateLoan } from '../../hooks/useLoans';
 import { toStorageAmount, fromStorageAmount } from '../../utils/currency';
 import { todayISO } from '../../utils/dateHelpers';
 import { Input } from '../ui/Input';
@@ -21,6 +21,8 @@ interface FormData {
 interface Props { onClose: () => void; existing?: Loan; }
 
 export function LoanForm({ onClose, existing }: Props) {
+  const addLoan = useAddLoan();
+  const updateLoan = useUpdateLoan();
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     defaultValues: existing ? {
       borrowerName: existing.borrowerName,
@@ -42,22 +44,20 @@ export function LoanForm({ onClose, existing }: Props) {
   const isDrawing = watch('isDrawing') === 'true';
 
   async function onSubmit(data: FormData) {
-    const now = new Date();
     const payload = {
       borrowerName: isDrawing ? 'Self (Drawing)' : data.borrowerName,
       isDrawing: isDrawing,
       principalAmount: toStorageAmount(data.principalAmount),
       interestRate: parseFloat(data.interestRate) || 0,
-      startDate: new Date(data.startDate),
-      expectedRepaymentDate: new Date(data.expectedRepaymentDate),
+      startDate: data.startDate,
+      expectedRepaymentDate: data.expectedRepaymentDate,
       repaymentSchedule: data.repaymentSchedule as Loan['repaymentSchedule'],
       notes: data.notes || undefined,
-      updatedAt: now,
     };
     if (existing?.id) {
-      await db.loans.update(existing.id, payload);
+      await updateLoan.mutateAsync({ id: existing.id, ...payload } as any);
     } else {
-      await db.loans.add({ ...payload, status: 'active', totalRepaid: 0, createdAt: now });
+      await addLoan.mutateAsync(payload as any);
     }
     onClose();
   }

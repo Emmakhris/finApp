@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id           Int           @id @default(autoincrement())
+  name         String
+  type         String
+  account_type String
+  color        String
+  is_custom    Boolean       @default(false)
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  date          DateTime
+  type          String
+  amount        Int
+  description   String
+  category_id   Int
+  account_type  String
+  source        String?
+  tags          String[] @default([])
+  receivable_id Int?
+  payable_id    Int?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  category Category @relation(fields: [category_id], references: [id])
+
+  @@map("transactions")
+}
+
+model Receivable {
+  id              Int      @id @default(autoincrement())
+  contact_name    String
+  description     String
+  original_amount Int
+  amount_paid     Int      @default(0)
+  due_date        DateTime
+  status          String   @default("unpaid")
+  account_type    String
+  notes           String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  payments        Payment[]
+
+  @@map("receivables")
+}
+
+model Payable {
+  id              Int      @id @default(autoincrement())
+  creditor_name   String
+  description     String
+  original_amount Int
+  amount_paid     Int      @default(0)
+  due_date        DateTime
+  status          String   @default("unpaid")
+  account_type    String
+  notes           String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  payments        Payment[]
+
+  @@map("payables")
+}
+
+model Payment {
+  id           Int      @id @default(autoincrement())
+  parent_type  String
+  parent_id    Int
+  amount       Int
+  date         DateTime
+  notes        String?
+  created_at   DateTime @default(now())
+
+  receivable   Receivable? @relation(fields: [parent_id], references: [id])
+  payable      Payable?    @relation(fields: [parent_id], references: [id])
+
+  @@map("payments")
+}
+
+model Loan {
+  id                      Int             @id @default(autoincrement())
+  borrower_name           String
+  is_drawing              Boolean         @default(false)
+  principal_amount        Int
+  interest_rate           Float           @default(0)
+  start_date              DateTime
+  expected_repayment_date DateTime
+  repayment_schedule      String
+  status                  String          @default("active")
+  total_repaid            Int             @default(0)
+  notes                   String?
+  created_at              DateTime        @default(now())
+  updated_at              DateTime        @updatedAt
+  repayments              LoanRepayment[]
+
+  @@map("loans")
+}
+
+model LoanRepayment {
+  id         Int      @id @default(autoincrement())
+  loan_id    Int
+  amount     Int
+  date       DateTime
+  notes      String?
+  created_at DateTime @default(now())
+
+  loan Loan @relation(fields: [loan_id], references: [id])
+
+  @@map("loan_repayments")
+}

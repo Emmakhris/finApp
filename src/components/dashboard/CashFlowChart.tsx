@@ -16,7 +16,7 @@ export function CashFlowChart() {
             <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v.toLocaleString()}`} />
             <Tooltip
-              formatter={(value: number, name: string) => [`GHS ${value.toLocaleString('en-GH', { minimumFractionDigits: 2 })}`, name]}
+              formatter={(value, name) => [`GHS ${Number(value).toLocaleString('en-GH', { minimumFractionDigits: 2 })}`, String(name)]}
               contentStyle={{ border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: 12 }}
             />
             <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />

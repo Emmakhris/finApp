@@ -1,11 +1,10 @@
 import { useForm } from 'react-hook-form';
-import { db } from '../../db/db';
 import { toStorageAmount, fromStorageAmount } from '../../utils/currency';
 import { todayISO } from '../../utils/dateHelpers';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
-import { useCategories } from '../../hooks/useTransactions';
+import { useCategories, useAddTransaction, useUpdateTransaction } from '../../hooks/useTransactions';
 import type { Transaction } from '../../types';
 
 interface FormData {
@@ -25,6 +24,8 @@ interface Props {
 
 export function TransactionForm({ onClose, existing }: Props) {
   const categories = useCategories() ?? [];
+  const addTransaction = useAddTransaction();
+  const updateTransaction = useUpdateTransaction();
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     defaultValues: existing ? {
       date: new Date(existing.date).toISOString().slice(0, 10),
@@ -49,21 +50,19 @@ export function TransactionForm({ onClose, existing }: Props) {
   );
 
   async function onSubmit(data: FormData) {
-    const now = new Date();
     const payload = {
-      date: new Date(data.date),
+      date: data.date,
       type: data.type,
       amount: toStorageAmount(data.amount),
       description: data.description,
       categoryId: Number(data.categoryId),
       accountType: data.accountType,
       source: data.source || undefined,
-      updatedAt: now,
     };
     if (existing?.id) {
-      await db.transactions.update(existing.id, payload);
+      await updateTransaction.mutateAsync({ id: existing.id, ...payload } as any);
     } else {
-      await db.transactions.add({ ...payload, createdAt: now });
+      await addTransaction.mutateAsync(payload as any);
     }
     onClose();
   }

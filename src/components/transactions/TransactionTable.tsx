@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil, Trash2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { db } from '../../db/db';
+import { useDeleteTransaction } from '../../hooks/useTransactions';
 import { formatGHS } from '../../utils/currency';
 import { formatDate } from '../../utils/dateHelpers';
 import { Badge } from '../ui/Badge';
@@ -19,9 +19,10 @@ export function TransactionTable({ transactions, categories }: Props) {
   const catMap = Object.fromEntries(categories.map(c => [c.id, c]));
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const deleteTransaction = useDeleteTransaction();
 
   async function handleDelete() {
-    if (deleting != null) await db.transactions.delete(deleting);
+    if (deleting != null) await deleteTransaction.mutateAsync(deleting);
     setDeleting(null);
   }
 
