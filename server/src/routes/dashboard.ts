@@ -78,10 +78,11 @@ router.get('/monthly-chart', async (req, res) => {
       }),
     ]);
 
+    const label = d.toLocaleString('en-US', { month: 'short' });
     months.push({
-      month: d.toISOString().slice(0, 7),
-      income: inc._sum.amount ?? 0,
-      expenses: exp._sum.amount ?? 0,
+      month: label,
+      income: Math.round((inc._sum.amount ?? 0) / 100),
+      expenses: Math.round((exp._sum.amount ?? 0) / 100),
     });
   }
 

@@ -10,6 +10,7 @@ export function useDashboardSummary(month: Date, accountFilter: 'all' | 'persona
   const { data } = useQuery<DashboardSummary>({
     queryKey: ['dashboard', 'summary', monthStr, accountFilter],
     queryFn: () => apiFetch<DashboardSummary>(`/dashboard/summary?${params}`),
+    staleTime: 0,
   });
   return data;
 }
@@ -19,6 +20,7 @@ export function useMonthlyChartData(accountFilter: 'all' | 'personal' | 'busines
   const { data } = useQuery<MonthlyData[]>({
     queryKey: ['dashboard', 'monthly-chart', accountFilter],
     queryFn: () => apiFetch<MonthlyData[]>(`/dashboard/monthly-chart${params}`),
+    staleTime: 0,
   });
   return data;
 }

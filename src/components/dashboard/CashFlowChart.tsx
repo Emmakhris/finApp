@@ -14,9 +14,9 @@ export function CashFlowChart() {
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v.toLocaleString()}`} />
+            <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `GHS ${Number(v).toLocaleString('en-GH')}`} />
             <Tooltip
-              formatter={(value, name) => [`GHS ${Number(value).toLocaleString('en-GH', { minimumFractionDigits: 2 })}`, String(name)]}
+              formatter={(value, name) => [`GHS ${Number(value).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, String(name)]}
               contentStyle={{ border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: 12 }}
             />
             <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
