@@ -2,14 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../lib/apiClient';
 import type { DashboardSummary, MonthlyData } from '../types';
 
-export function useDashboardSummary(month: Date, accountFilter: 'all' | 'personal' | 'business'): DashboardSummary | undefined {
-  const monthStr = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-01`;
-  const params = new URLSearchParams({ month: monthStr });
-  if (accountFilter !== 'all') params.set('accountType', accountFilter);
-
+export function useDashboardSummary(accountFilter: 'all' | 'personal' | 'business'): DashboardSummary | undefined {
+  const params = accountFilter !== 'all' ? `?accountType=${accountFilter}` : '';
   const { data } = useQuery<DashboardSummary>({
-    queryKey: ['dashboard', 'summary', monthStr, accountFilter],
-    queryFn: () => apiFetch<DashboardSummary>(`/dashboard/summary?${params}`),
+    queryKey: ['dashboard', 'summary', accountFilter],
+    queryFn: () => apiFetch<DashboardSummary>(`/dashboard/summary${params}`),
     staleTime: 0,
   });
   return data;

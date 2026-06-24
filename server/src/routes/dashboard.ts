@@ -10,11 +10,7 @@ function monthWindow(year: number, month: number) {
 }
 
 router.get('/summary', async (req, res) => {
-  const { month, accountType } = req.query as Record<string, string>;
-
-  // Parse the incoming month string as UTC to avoid timezone shift
-  const ref = month ? new Date(month) : new Date();
-  const { start, end } = monthWindow(ref.getUTCFullYear(), ref.getUTCMonth());
+  const { accountType } = req.query as Record<string, string>;
 
   const accountFilter = accountType && accountType !== 'all' ? { account_type: accountType } : {};
 
@@ -22,11 +18,11 @@ router.get('/summary', async (req, res) => {
     await Promise.all([
       prisma.transaction.aggregate({
         _sum: { amount: true },
-        where: { type: 'income', date: { gte: start, lt: end }, ...accountFilter },
+        where: { type: 'income', ...accountFilter },
       }),
       prisma.transaction.aggregate({
         _sum: { amount: true },
-        where: { type: 'expense', date: { gte: start, lt: end }, ...accountFilter },
+        where: { type: 'expense', ...accountFilter },
       }),
       prisma.receivable.aggregate({
         _sum: { original_amount: true, amount_paid: true },
