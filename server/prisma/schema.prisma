@@ -51,7 +51,6 @@ model Receivable {
   notes           String?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
-  payments        Payment[]
 
   @@map("receivables")
 }
@@ -68,22 +67,18 @@ model Payable {
   notes           String?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
-  payments        Payment[]
 
   @@map("payables")
 }
 
 model Payment {
-  id           Int      @id @default(autoincrement())
-  parent_type  String
-  parent_id    Int
-  amount       Int
-  date         DateTime
-  notes        String?
-  created_at   DateTime @default(now())
-
-  receivable   Receivable? @relation(fields: [parent_id], references: [id])
-  payable      Payable?    @relation(fields: [parent_id], references: [id])
+  id          Int      @id @default(autoincrement())
+  parent_type String
+  parent_id   Int
+  amount      Int
+  date        DateTime
+  notes       String?
+  created_at  DateTime @default(now())
 
   @@map("payments")
 }
