@@ -16,6 +16,8 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+app.get('/api/health', (_req, res) => res.json({ ok: true }));
+
 app.use('/api', requireApiKey);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/transactions', transactionsRouter);
@@ -26,7 +28,5 @@ app.use('/api/loans', loansRouter);
 app.use('/api/loan-repayments', loanRepaymentsRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/backup', backupRouter);
-
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 export default app;
