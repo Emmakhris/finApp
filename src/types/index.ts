@@ -108,3 +108,38 @@ export interface MonthlyData {
   income: number;
   expenses: number;
 }
+
+export type InvestmentType = 'stock' | 'bond' | 'crypto' | 'real_estate' | 'mutual_fund' | 'other';
+export type InvestmentStatus = 'active' | 'exited' | 'matured';
+
+export interface Investment {
+  id?: number;
+  name: string;
+  investmentType: InvestmentType;
+  accountType: AccountType;
+  amountInvested: number; // pesewas
+  currentValue: number;   // pesewas
+  purchaseDate: Date;
+  maturityDate?: Date;
+  description?: string;
+  notes?: string;
+  status: InvestmentStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InvestmentUpdate {
+  id?: number;
+  investmentId: number;
+  value: number; // pesewas
+  date: Date;
+  notes?: string;
+  createdAt: Date;
+}
+
+export interface InvestmentSummary {
+  totalInvested: number;
+  totalCurrentValue: number;
+  gainLoss: number;
+  count: number;
+}

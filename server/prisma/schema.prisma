@@ -114,3 +114,46 @@ model LoanRepayment {
 
   @@map("loan_repayments")
 }
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  name          String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Investment {
+  id              Int               @id @default(autoincrement())
+  name            String
+  investment_type String
+  account_type    String
+  amount_invested Int
+  current_value   Int
+  purchase_date   DateTime
+  maturity_date   DateTime?
+  description     String?
+  notes           String?
+  status          String            @default("active")
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+  value_updates   InvestmentUpdate[]
+
+  @@map("investments")
+}
+
+model InvestmentUpdate {
+  id            Int        @id @default(autoincrement())
+  investment_id Int
+  value         Int
+  date          DateTime
+  notes         String?
+  created_at    DateTime   @default(now())
+
+  investment Investment @relation(fields: [investment_id], references: [id], onDelete: Cascade)
+
+  @@map("investment_updates")
+}

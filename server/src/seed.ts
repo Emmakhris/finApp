@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import prisma from './lib/prisma';
 
 const categories = [
@@ -35,8 +36,23 @@ const categories = [
 ];
 
 async function main() {
-  console.log('Seeding 28 default categories...');
+  console.log('Seeding categories...');
   await prisma.category.createMany({ data: categories, skipDuplicates: true });
+
+  // Seed admin user
+  const email = process.env.ADMIN_EMAIL || 'kwamebronya@gmail.com';
+  const password = process.env.ADMIN_PASSWORD || 'FinApp2024!';
+  const name = process.env.ADMIN_NAME || 'Chris';
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (!existing) {
+    const password_hash = await bcrypt.hash(password, 12);
+    await prisma.user.create({ data: { email, password_hash, name } });
+    console.log(`Admin user created: ${email}`);
+  } else {
+    console.log(`Admin user already exists: ${email}`);
+  }
+
   console.log('Done.');
 }
 

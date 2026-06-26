@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, TrendingUp, HandCoins, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, TrendingUp, PieChart, BarChart3 } from 'lucide-react';
 
 const mobileNav = [
   { to: '/', icon: LayoutDashboard, label: 'Home' },
   { to: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
   { to: '/receivables', icon: TrendingUp, label: 'Receivables' },
-  { to: '/loans', icon: HandCoins, label: 'Loans' },
+  { to: '/investments', icon: PieChart, label: 'Investments' },
   { to: '/reports', icon: BarChart3, label: 'Reports' },
 ];
 

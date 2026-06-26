@@ -1,34 +1,35 @@
-import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import { formatGHS } from '../../utils/currency';
 
 interface Props {
   label: string;
   value: number;
   icon: LucideIcon;
-  variant: 'income' | 'expense' | 'neutral' | 'warning' | 'indigo';
+  variant: 'income' | 'expense' | 'neutral' | 'warning' | 'indigo' | 'purple';
   subtitle?: string;
 }
 
 const variantStyles = {
-  income:  { card: 'border-emerald-100', icon: 'bg-emerald-50 text-emerald-600', value: 'text-emerald-600' },
-  expense: { card: 'border-rose-100',    icon: 'bg-rose-50 text-rose-600',       value: 'text-rose-600' },
-  neutral: { card: 'border-slate-200',   icon: 'bg-slate-100 text-slate-600',    value: 'text-slate-900' },
-  warning: { card: 'border-amber-100',   icon: 'bg-amber-50 text-amber-600',     value: 'text-amber-700' },
-  indigo:  { card: 'border-indigo-100',  icon: 'bg-indigo-50 text-indigo-600',   value: 'text-indigo-700' },
+  income:  { bg: 'from-emerald-500 to-emerald-600', icon: 'bg-white/20', text: 'text-white' },
+  expense: { bg: 'from-rose-500 to-rose-600',       icon: 'bg-white/20', text: 'text-white' },
+  neutral: { bg: 'from-slate-600 to-slate-700',     icon: 'bg-white/20', text: 'text-white' },
+  warning: { bg: 'from-amber-400 to-amber-500',     icon: 'bg-white/20', text: 'text-white' },
+  indigo:  { bg: 'from-indigo-500 to-indigo-600',   icon: 'bg-white/20', text: 'text-white' },
+  purple:  { bg: 'from-purple-500 to-purple-600',   icon: 'bg-white/20', text: 'text-white' },
 };
 
 export function SummaryCard({ label, value, icon: Icon, variant, subtitle }: Props) {
   const s = variantStyles[variant];
   return (
-    <div className={`bg-white rounded-xl border ${s.card} p-5 flex items-start gap-4`}>
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${s.icon}`}>
-        <Icon size={18} />
+    <div className={`bg-gradient-to-br ${s.bg} rounded-xl p-4 shadow-sm`}>
+      <div className="flex items-start justify-between mb-3">
+        <div className={`w-9 h-9 rounded-lg ${s.icon} flex items-center justify-center`}>
+          <Icon size={17} className="text-white" />
+        </div>
       </div>
-      <div className="min-w-0">
-        <p className="text-xs text-slate-500 mb-1">{label}</p>
-        <p className={`text-lg font-bold truncate ${s.value}`}>{formatGHS(value)}</p>
-        {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
-      </div>
+      <p className="text-xs text-white/70 mb-1">{label}</p>
+      <p className="text-lg font-bold text-white truncate">{formatGHS(value)}</p>
+      {subtitle && <p className="text-xs text-white/60 mt-0.5">{subtitle}</p>}
     </div>
   );
 }
