@@ -1,0 +1,7 @@
+"Version 1 - The first working phase of my FinApp. Basic UI basic functionality"
+
+
+future upgrades
+1. A New UI 
+2. Login 
+3. Investment -track business and personal investment
